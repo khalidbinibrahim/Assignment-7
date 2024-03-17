@@ -45,7 +45,7 @@ function App() {
 
   return (
     <>
-      <div className='px-36 py-14'>
+      <div className='px-4 lg:px-36 py-4 lg:py-14'>
         <Navigation />
         <Header />
         <OurRecipes />
