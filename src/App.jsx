@@ -1,5 +1,7 @@
 import './App.css'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navigation from './components/Navigation/navigation'
 import Header from './components/Header/header'
 import OurRecipes from './components/Our Recipes/ourRecipes'
@@ -9,8 +11,7 @@ import SideBar from './components/Our Recipes/Sidebar/sideBar'
 function App() {
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState([]);
-
-  const [clickCount, setClickCount] = useState({});
+  const [currentlyCooking, setCurrentlyCooking] = useState([]);
 
   useEffect(() => {
     fetch('recipe.json')
@@ -21,7 +22,25 @@ function App() {
   function handleCook(recipe) {
     if (!selectedRecipe.some(item => item.recipe_id === recipe.recipe_id)) {
       setSelectedRecipe(prevSelected => [...prevSelected, recipe]);
+    } else {
+      const alreadyClicked = selectedRecipe.some(item => item.recipe_id === recipe.recipe_id);
+      if (alreadyClicked) {
+        toast.warning(`Already Exist`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
     }
+  }
+
+  function handlePreparing(recipe) {
+    setSelectedRecipe(prevSelected => prevSelected.filter(item => item.recipe_id !== recipe.recipe_id));
+    setCurrentlyCooking(prevCooking => [...prevCooking, recipe]);
   }
 
   return (
@@ -31,23 +50,19 @@ function App() {
         <Header />
         <OurRecipes />
 
-
         <div className="flex flex-col lg:flex-row gap-6">
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {
-              recipes.map(recipe => (
-                <RecipeCardSection handleCook={handleCook} key={recipe.recipe_id} recipe={recipe} />
-              ))
-            }
+            {recipes.map(recipe => (
+              <RecipeCardSection key={recipe.recipe_id} recipe={recipe} handleCook={handleCook} />
+            ))}
           </div>
-
-          <SideBar selectedRecipe={selectedRecipe} />
+          <SideBar selectedRecipe={selectedRecipe} currentlyCooking={currentlyCooking} handlePreparing={handlePreparing} />
         </div>
-
       </div>
+      <ToastContainer />
     </>
   );
 }
 
-export default App
+export default App;
+
